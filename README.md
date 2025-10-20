@@ -13,8 +13,6 @@ Input Parsing and Formalization – The input is transformed into structured par
 Optimization and Solution Delivery – The system integrates high-performance solvers (e.g., OR-Tools, Concorde, LKH) to compute efficient routes and explain the results clearly.
 
 
-Open AI Key and Google Map API Key is needed to run this \
-Put them in a .env file in the root and in the extraction_tools folders
 
 ## ⚙️ Setup
 
@@ -35,10 +33,16 @@ Put them in a .env file in the root and in the extraction_tools folders
    ```bash
    python main.py
    ```
-3. Access the web UI:
+4. Access the web UI:
    ```
    search.html
    ```
+5. Keys
+Open AI Key and Google Map API Key is needed to run this \
+Put them in a .env file in the root and in the extraction_tools folders
+or else:
+You will have to provide the distance matrix or sufficient measurements for the agent to solve the problem
+
 
 ## ⚙️ Test Data
 
