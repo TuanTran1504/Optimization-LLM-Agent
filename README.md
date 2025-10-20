@@ -1,9 +1,8 @@
 # Optimization LLM: 
 
----
-Open AI Key and Google Map API Key is needed to run this
+
+Open AI Key and Google Map API Key is needed to run this \\
 Put them in a .env file in the root and in the extraction_tools folders
----
 
 ## ⚙️ Setup
 
