@@ -1,7 +1,19 @@
 # Optimization LLM: 
 
+🔍 Overview
 
-Open AI Key and Google Map API Key is needed to run this \\
+This project explores how Generative AI and optimization can be combined to make complex problem-solving more accessible. The system is designed to let users define Travelling Salesman Problem (TSP) scenarios through natural language conversation, which are then interpreted, formalized, and solved automatically. Built with LangGraph, the framework integrates conversational input, semantic parsing, and optimization tools into a coherent, intelligent agent system.
+
+🧩 Core Components
+
+Conversational Problem Specification – Users describe TSP scenarios via dialogue; the system extracts entities, routes, and constraints.
+
+Input Parsing and Formalization – The input is transformed into structured parameters suitable for computational processing.
+
+Optimization and Solution Delivery – The system integrates high-performance solvers (e.g., OR-Tools, Concorde, LKH) to compute efficient routes and explain the results clearly.
+
+
+Open AI Key and Google Map API Key is needed to run this \
 Put them in a .env file in the root and in the extraction_tools folders
 
 ## ⚙️ Setup
