@@ -1,0 +1,7 @@
+__pycache__/
+.env
+checkpoints.sqlite
+checkpoints.sqlite-shm
+checkpoints.sqlite-wal
+/threads
+BERT_scoring.py

@@ -1,0 +1,13 @@
+"distance_matrix": [
+    [0, 18, 24, 28],
+    [18, 0, 12, 15],
+    [24, 12, 0, 10],
+    [28, 15, 10, 0],
+  ],
+🛰️ Drone specs:
+
+Max payload: 8 kg
+
+Battery endurance: 90 minutes total flight time
+
+Cruising speed: 60 km/h

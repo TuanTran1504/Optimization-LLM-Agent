@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chat Interface</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #1a1a2e;
+      color: white;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem;
+      overflow: hidden;
+    }
+    .conversation-history {
+      flex-grow: 1;
+      width: 100%;
+      max-width: 900px;
+      overflow-y: auto;
+      padding: 1rem 0;
+      text-align: left;
+      display: none;
+      margin-bottom: 2rem;
+    }
+    .user-message, .ai-message {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      line-height: 1.6;
+    }
+    .user-message {
+      background-color: #4a90e2;
+      color: white;
+      margin-left: auto;
+      max-width: 75%;
+    }
+    .ai-message {
+      background-color: #2c2c44;
+      color: #ccc;
+      margin-right: auto;
+      max-width: 75%;
+    }
+    .constraint-panel {
+      width: 360px;
+      background-color: #2c2c44;
+      padding: 1rem;
+      border-left: 1px solid #4a4a6b;
+      overflow-y: auto;
+      display: none;
+    }
+    @media (min-width: 1024px) {
+      .constraint-panel {
+        display: block;
+      }
+    }
+    pre {
+      background-color: #1f1f33;
+      color: #a9dcff;
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 flex">
+
+  <!-- History Sidebar -->
+  <div class="history-container hidden md:flex flex-col w-72 bg-[#2c2c44] border-r border-[#4a4a6b] p-6 overflow-y-auto">
+    <h2 class="text-xl font-bold mb-4 text-center text-blue-400">History</h2>
+    <div id="historyList" class="history-list flex flex-col gap-4"></div>
+  </div>
+
+  <!-- Main Chat Area -->
+  <div class="main-container">
+    <h1 id="greeting" class="greeting text-4xl font-bold text-blue-400 mt-6">Hello,</h1>
+    <div id="threadStatus" class="thread-status text-blue-400 mb-1">No Thread Selected</div>
+
+    <!-- 🧭 Added: Current Node Display -->
+    <div id="currentNodeDisplay" class="current-node text-green-400 mb-4 font-semibold hidden">
+      🧭 Current Node: <span id="currentNodeValue">N/A</span>
+    </div>
+
+    <div id="conversationHistory" class="conversation-history"></div>
+
+    <div class="input-container w-full max-w-[900px] flex items-center gap-4">
+      <button id="newThreadButton" class="new-thread-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full shadow-md">New Thread</button>
+      <input type="text" id="promptInput" placeholder="Select or create a thread to start chatting" class="input-field flex-grow bg-[#2c2c44] text-white border-2 border-[#4a4a6b] rounded-full px-6 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50" disabled>
+      <button id="enterButton" class="enter-button bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full shadow-md" disabled>Enter</button>
+    </div>
+  </div>
+
+  <!-- Constraint Panel -->
+  <div class="constraint-panel">
+    <h2 class="text-xl font-bold text-blue-400 mb-3">🧩 Current Constraints</h2>
+    <pre id="constraintDisplay">No constraints yet.</pre>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const promptInput = document.getElementById('promptInput');
+      const enterButton = document.getElementById('enterButton');
+      const newThreadButton = document.getElementById('newThreadButton');
+      const greeting = document.getElementById('greeting');
+      const conversationHistoryEl = document.getElementById('conversationHistory');
+      const historyListEl = document.getElementById('historyList');
+      const threadStatusEl = document.getElementById('threadStatus');
+      const constraintPanel = document.getElementById('constraintDisplay');
+
+      // 🧭 Added: Node display elements
+      const currentNodeDisplay = document.getElementById('currentNodeDisplay');
+      const currentNodeValue = document.getElementById('currentNodeValue');
+
+      let threadId = null;
+      let currentSession = null;
+
+      const fetchThreads = async () => {
+        try {
+          const response = await fetch('http://127.0.0.1:8000/threads');
+          const threads = await response.json();
+          updateHistoryList(threads);
+        } catch {
+          historyListEl.innerHTML = '<div class="history-item">Error loading threads</div>';
+        }
+      };
+
+      const updateHistoryList = (threads) => {
+        historyListEl.innerHTML = '';
+        threads.forEach(thread => {
+          const div = document.createElement('div');
+          div.className = 'history-item bg-[#3b3b55] rounded-lg px-3 py-2 hover:bg-[#4a4a6b] cursor-pointer truncate';
+          div.textContent = `Thread: ${thread.thread_id.substring(0, 8)}...`;
+          div.onclick = () => loadSession(thread.thread_id);
+          historyListEl.appendChild(div);
+        });
+      };
+
+      const updateThreadStatus = () => {
+        threadStatusEl.textContent = threadId
+          ? `Current Thread: ${threadId.substring(0, 8)}...`
+          : 'No Thread Selected';
+        promptInput.disabled = !threadId;
+        enterButton.disabled = !threadId;
+      };
+      let nodePoller = null;
+
+      const startNodeWatcher = () => {
+        if (nodePoller) clearInterval(nodePoller);
+        if (!threadId) return;
+
+        nodePoller = setInterval(async () => {
+          try {
+            const res = await fetch(`http://127.0.0.1:8000/threads/${threadId}/status.json?_=${Date.now()}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data?.current_node) updateCurrentNode(data.current_node);
+            }
+          } catch (err) {
+            console.log("Node watcher error:", err);
+          }
+        }, 1000); // every 1 second
+      };
+      
+      const stopNodeWatcher = () => {
+        if (nodePoller) clearInterval(nodePoller);
+      };
+            const loadSession = (id) => {
+              threadId = id;
+              currentSession = { thread_id: id, messages: [] };
+              renderConversation();
+              updateThreadStatus();
+              startNodeWatcher();  
+            };
+
+      const createNewThread = () => {
+        threadId = crypto.randomUUID();
+        currentSession = { thread_id: threadId, messages: [] };
+        renderConversation();
+        updateThreadStatus();
+        startNodeWatcher();  
+      };
+
+      const renderConversation = () => {
+        greeting.style.display = 'none';
+        conversationHistoryEl.style.display = 'block';
+        conversationHistoryEl.innerHTML = '';
+        if (currentSession?.messages) {
+          currentSession.messages.forEach(m => {
+            const div = document.createElement('div');
+            div.className = m.user ? 'user-message' : 'ai-message';
+            div.textContent = m.user || m.ai;
+            conversationHistoryEl.appendChild(div);
+          });
+        }
+        conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
+      };
+
+      const updateConstraintPanel = (constraints) => {
+        constraintPanel.textContent = JSON.stringify(constraints, null, 2);
+      };
+
+      // 🧭 Added: Update current node display
+      const updateCurrentNode = (node) => {
+        if (!node || node === "unknown") {
+          currentNodeDisplay.classList.add('hidden');
+        } else {
+          currentNodeValue.textContent = node;
+          currentNodeDisplay.classList.remove('hidden');
+        }
+      };
+
+      const handleEnter = async () => {
+        const text = promptInput.value.trim();
+        if (!text || !threadId) return;
+
+        currentSession.messages.push({ user: text });
+        renderConversation();
+
+        enterButton.disabled = true;
+        promptInput.value = '';
+
+        const thinking = document.createElement('div');
+        thinking.className = 'ai-message';
+        thinking.textContent = 'Thinking...';
+        conversationHistoryEl.appendChild(thinking);
+        conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
+      
+        try {
+          const res = await fetch('http://127.0.0.1:8000/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, thread_id: threadId })
+          });
+          const data = await res.json();
+
+          if (data?.response) {
+            currentSession.messages.push({ ai: data.response });
+            thinking.textContent = data.response;
+          } else {
+            thinking.textContent = 'An error occurred. Please try again.';
+          }
+
+          // 🧩 Update constraint panel
+          if (data?.constraints) {
+            updateConstraintPanel(data.constraints);
+          }
+
+          // 🧭 Update current node display
+          if (data?.current_node) {
+            updateCurrentNode(data.current_node);
+          }
+        } catch {
+          thinking.textContent = 'Could not connect to the service.';
+        } finally {
+          enterButton.disabled = false;
+          conversationHistoryEl.scrollTop = conversationHistoryEl.scrollHeight;
+          await fetchThreads();
+        }
+      };
+
+      newThreadButton.addEventListener('click', createNewThread);
+      enterButton.addEventListener('click', handleEnter);
+      promptInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleEnter();
+      });
+
+      await fetchThreads();
+      updateThreadStatus();
+    });
+  </script>
+</body>
+</html>

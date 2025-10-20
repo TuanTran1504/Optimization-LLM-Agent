@@ -1,0 +1,27 @@
+Delivery Route Optimization Problem
+
+A logistics company needs to determine the most efficient route for a delivery van to visit Boston, New York, Philadelphia, and Washington D.C.
+ The goal is to minimize the total travel distance, while respecting delivery timing windows and vehicle capacity constraints.
+
+Start and End Points: The route must start in Boston and end in Washington D.C.
+
+Timing Constraints:
+
+Washington D.C. must be visited before 12:00 PM (noon).
+
+Philadelphia must be visited after 2:00 PM.
+
+Capacity Constraint:
+
+The van can carry up to 200 units.
+
+Delivery demands are:
+
+Boston = 30 units
+
+New York = 50 units
+
+Philadelphia = 100 units
+
+Washington D.C. = 20 units
+

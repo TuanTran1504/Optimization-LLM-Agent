@@ -1,0 +1,14 @@
+langgraph
+langchain
+langchain_ollama
+langchain_core
+langchain_community
+langextract
+langchain_openai
+flask
+googlemaps
+langgraph-checkpoint-sqlite
+flask_cors
+sentence-transformers
+scikit-learn
+ortools

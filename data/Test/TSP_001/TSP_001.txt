@@ -1,0 +1,43 @@
+This problem describes a delivery route planning scenario with one vehicle that starts at a depot, visits three customer stops, and finishes at another depot.
+
+There are five locations in total:
+
+DepotStart (N0) — where the vehicle begins its route.
+
+Stop A (N1) — first customer stop.
+
+Stop B (N2) — second customer stop.
+
+Stop C (N3) — third customer stop.
+
+DepotEnd (N4) — where the vehicle must finish its journey.
+
+The distances between locations are defined pairwise.
+"distance_km": [
+    [  0, 340, 215, 300, 725],
+    [340,   0,  95, 155, 365],
+    [215,  95,   0, 120, 290],
+    [300, 155, 120,   0, 230],
+    [725, 365, 290, 230,   0]
+  ], 
+
+Each location also has a time window that defines when it can be visited:
+
+The vehicle must depart the starting depot between 8:00 AM and 9:00 AM 
+
+Stop A is available from 9:30 AM onward until 6 PM.
+
+Stop B can only be served after 2 PM 
+
+Stop C can be visited any time before 6 PM 
+
+The final depot must be reached no later than 6 PM 
+
+The vehicle capacity is 200 units in total. Each location has a delivery demand: 50 units at Stop A, 100 units at Stop B, 30 units at Stop C, and 20 units at the final depot. The vehicle starts fully loaded at 200 units from the starting depot.
+Forbidden edges: The vehicle cannot go directly from Stop A to the end depot.
+
+Precedence: Stop B must be visited before Stop A.
+
+Average speed is 60 km/hr
+
+
