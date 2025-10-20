@@ -28,6 +28,11 @@ Put them in a .env file in the root and in the extraction_tools folders
    search.html
    ```
 
+## ⚙️ Test Data
+
+The problem descriptions in the data folder can be used to test the agent and its ability to extract constraints from user input 
+
+![Uploading WhatsApp Image 2025-10-16 at 9.49.09 PM.jpeg…]()
 
 
 ## 📄 License
