@@ -37,7 +37,7 @@ Optimization and Solution Delivery – The system integrates high-performance so
    ```
    search.html
    ```
-5. Keys:
+5. Keys:\
 Open AI Key and Google Map API Key is needed to run this \
 Put them in a .env file in the root and in the extraction_tools folders
 
