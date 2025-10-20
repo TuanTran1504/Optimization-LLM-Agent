@@ -33,7 +33,7 @@ Put them in a .env file in the root and in the extraction_tools folders
 The problem descriptions in the data folder can be used to test the agent and its ability to extract constraints from user input 
 
 <p align="center">
-  <img src="data/images/images.jpeg" alt="Example Image" width="400"/>
+  <img src="data/images/images.jpeg" alt="Example Image" width="1000"/>
 </p>
 
 ## 📄 License
